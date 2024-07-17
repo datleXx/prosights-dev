@@ -1,8 +1,12 @@
 'use client'; 
 
-import SignIn from "../authentication/sign-in"
+import dynamic from "next/dynamic";
 
 const Landing = () => {
+
+    const SignIn = dynamic(() => import("../authentication/sign-in"), {
+        ssr: false,
+      });
     return (
         <div> 
             <SignIn /> 

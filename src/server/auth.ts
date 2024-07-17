@@ -5,9 +5,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
-import DiscordProvider from "next-auth/providers/discord";
 
-import { env } from "~/env";
 import { db } from "~/server/db";
 import {
   accounts,
@@ -15,7 +13,7 @@ import {
   users,
   verificationTokens,
 } from "~/server/db/schema";
-import GoogleProvider from 'next-auth/providers/google';
+import GoogleProvider from "next-auth/providers/google";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -25,6 +23,8 @@ import GoogleProvider from 'next-auth/providers/google';
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
+    accessToken?: string;
+    refreshToken?: string;
     user: {
       id: string;
       // ...other properties
@@ -45,8 +45,18 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
+    async jwt({ token, account }) {
+      // Initial sign in
+      if (account) {
+        token.accessToken = account.access_token;
+        token.refreshToken = account.refresh_token;
+      }
+      return token;
+    },
+    session: ({ session, user, token }) => ({
       ...session,
+      accessToken: token.accessToken as string,
+      refreshToken: token.refreshToken as string,
       user: {
         ...session.user,
         id: user.id,
@@ -62,8 +72,8 @@ export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!
-  }),
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     /**
      * ...add more providers here.
      *

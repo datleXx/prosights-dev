@@ -1,0 +1,9 @@
+{
+    "crons": [
+      {
+        "path": "~/app/api/cron/route.ts",
+        "schedule": "* * * * *" 
+      }
+    ]
+  }
+  
