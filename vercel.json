@@ -2,7 +2,7 @@
     "crons": [
       {
         "path": "/api/cron/route.ts",
-        "schedule": "* * * * *" 
+        "schedule": "0 0 * * *" 
       }
     ]
   }
